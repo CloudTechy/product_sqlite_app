@@ -1,26 +1,9 @@
 import "package:flutter/material.dart";
 import 'package:product_sqlite_app/Product.dart';
-import 'dart:convert';
 import 'package:product_sqlite_app/Database.dart';
 import 'package:product_sqlite_app/ProductPage.dart';
 void main() => runApp(MyApp(products : SQliteDbProvider.db.getAllProducts()));
 
-//Future<List<Product>> getProducts() async{
-//  final response = await http.get("http://192.168.43.223:8000/products.json");
-//  if(response.statusCode == 200){
-//    return parseProducts(response.body);
-////   Map jsonProducts = jsonDecode(response.body).cast<Map<String, dynamic>>();
-//  }
-//  else {
-//    throw Exception('Unable to get products');
-//  }
-//
-//}
-
-List<Product> parseProducts(String responseBody){
-  final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
-  return parsed.map<Product>((x) => Product.fromMap(x)).toList();
-}
 
 class MyApp extends StatelessWidget {
   final Future<List<Product>> products;
@@ -28,6 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: "Product App",
         theme: ThemeData(primarySwatch: Colors.blue),
         home : MyHomePage(title : "List of products", products : products)
@@ -66,20 +50,44 @@ class ProductBoxList extends StatelessWidget {
   ProductBoxList({Key key, this.items});
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-        itemCount: items.length,
-        itemBuilder: (context, index){
-          return GestureDetector(
-            child: ProductBox(item : items[index]),
-            onTap: (){
-              Navigator.push(context, MaterialPageRoute(
-                  builder: (context)=> ProductPage(item: items[index])));
-            },
-          );
-        }
+    return ReOrderProductList(items);
+  }
+}
+class ReOrderProductList extends StatefulWidget {
+   final List<Product> items;
+  ReOrderProductList(this.items);
+
+  @override
+  _ReOrderProductListState createState() => _ReOrderProductListState();
+}
+
+class _ReOrderProductListState extends State<ReOrderProductList> {
+  @override
+  Widget build(BuildContext context) {
+    return ReorderableListView(
+      children: List.generate(widget.items.length, (index){
+        return GestureDetector(
+          key: ValueKey(index),
+          child: ProductBox(item : widget.items[index]),
+          onTap: (){
+            Navigator.push(context, MaterialPageRoute(
+                builder: (context)=> ProductPage(item: widget.items[index])));
+          },
+        );
+      }),
+      onReorder: (startIndex, endIndex) {
+       setState(() {
+         Product item = widget.items.removeAt(startIndex);
+         int index = endIndex > 0 ? endIndex - 1 : 0;
+         print(startIndex);
+         print(index);
+         widget.items.insert(index, item);
+       });
+      },
     );
   }
 }
+
 
 class ProductBox extends StatelessWidget {
   final Product item;
@@ -88,6 +96,7 @@ class ProductBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+        key: ValueKey(item.id),
         padding: EdgeInsets.all(2),
         height: 150,
         child: Card(
@@ -117,6 +126,9 @@ class ProductBox extends StatelessWidget {
     );
   }
 }
+
+
+
 class RatingBox extends StatefulWidget {
 
   @override
