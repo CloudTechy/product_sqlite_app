@@ -67,8 +67,6 @@ _to make sure you get all the project environment right, it will need to output_
 ## Contribution
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-## Inspiration
-inspired by a flutter app tutorial by [Tutorialspoint](https://www.tutorialspoint.com/flutter/flutter_database_concepts.htm)
 
 ## License
 [MIT](https://github.com/CloudTechy/product_sqlite_app/blob/master/LICENSE)
